@@ -1,0 +1,102 @@
+steps "Approval" {
+
+    actions "Approval" {
+        action_type = "Octopus.Manual"
+        environments = ["Production"]
+        properties = {
+            Octopus.Action.Manual.BlockConcurrentDeployments = "False"
+            Octopus.Action.Manual.Instructions = "asdf"
+            Octopus.Action.Manual.ResponsibleTeamIds = "teams-everyone"
+        }
+
+        worker_pool_variable = ""
+    }
+}
+
+steps "Flyway Migrate - Bash" {
+    properties = {
+        Octopus.Action.TargetRoles = "mysql-db"
+    }
+
+
+    actions "Flyway Migrate - Bash" {
+        properties = {
+            FlyWayPackage = "{\"PackageId\":\"TimeSheet.Web.DB\",\"FeedId\":\"feeds-builtin\"}"
+            locations = "adsf"
+            Octopus.Action.RunOnServer = "false"
+            Octopus.Action.Template.Id = "ActionTemplates-61"
+            Octopus.Action.Template.Version = "5"
+            RelativePath = "asdf"
+            targetPassword = "#{tomcat.password}"
+            targetUrl = "asdf"
+            targetUser = "sdaf"
+        }
+
+        worker_pool_variable = ""
+
+        packages "FlyWayPackage" {
+            acquisition_location = "Server"
+            feed_id_or_name = "Octopus Server (built-in)"
+            package_id = "TimeSheet.Web.DB"
+            properties = {
+                Extract = "True"
+                PackageParameterName = "FlyWayPackage"
+                SelectionMode = "deferred"
+            }
+
+        }
+    }
+}
+
+steps "Deploy Spring boot web app" {
+    properties = {
+        Octopus.Action.TargetRoles = "tomcat"
+    }
+
+
+    actions "Deploy Spring boot web app" {
+        action_type = "Octopus.TomcatDeploy"
+        properties = {
+            Octopus.Action.EnabledFeatures = ",Octopus.Features.TomcatDeployManager"
+            Octopus.Action.Package.DownloadOnTentacle = "False"
+            Octopus.Action.Package.FeedId = "Octopus Server (built-in)"
+            Octopus.Action.Package.PackageId = "TimeSheet.Web"
+            Tomcat.Deploy.Controller = "http://localhost:8080/manager"
+            Tomcat.Deploy.Enabled = "True"
+            Tomcat.Deploy.Password = "#{tomcat.password}"
+            Tomcat.Deploy.User = "#{tomcat.username}"
+        }
+
+        worker_pool_variable = ""
+
+        packages {
+            acquisition_location = "Server"
+            feed_id_or_name = "Octopus Server (built-in)"
+            package_id = "TimeSheet.Web"
+            properties = {
+                SelectionMode = "immediate"
+            }
+
+        }
+    }
+}
+
+steps "Notify team" {
+
+    actions "Notify team" {
+        properties = {
+            Octopus.Action.RunOnServer = "true"
+            Octopus.Action.Template.Id = "ActionTemplates-41"
+            Octopus.Action.Template.Version = "1"
+            ssn_Channel = "asdf"
+            ssn_Color = "good"
+            ssn_HookUrl = "asdf"
+            ssn_IconUrl = "https://octopus.com/content/resources/favicon.png"
+            ssn_Message = "asdf"
+            ssn_Title = "asdf"
+            ssn_Username = "Octopus Deploy"
+        }
+
+        worker_pool_id_or_name = "Default Worker Pool"
+    }
+}
